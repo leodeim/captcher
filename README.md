@@ -202,6 +202,48 @@ if errors.Is(err, captcher.ErrVerifyFailed) {
 | `ErrInvalidResponse` | Provider returned unparseable JSON |
 | `ErrTimeout` | Request context was cancelled or timed out |
 
+## Testing
+
+### Unit Tests
+
+Unit tests use mock HTTP servers and run without network access:
+
+```bash
+go test ./...
+```
+
+### Integration Tests
+
+Integration tests hit the real provider APIs using official test credentials:
+
+- **Cloudflare Turnstile**: [dummy sitekeys and secret keys](https://developers.cloudflare.com/turnstile/troubleshooting/testing/) with deterministic pass/fail/duplicate outcomes
+- **Google reCAPTCHA v2**: [public test keys](https://developers.google.com/recaptcha/docs/faq) that always pass verification
+- **Google reCAPTCHA v3**: uses the v2 test secret (same endpoint) to validate the HTTP flow end-to-end (score is not meaningful)
+
+Integration tests require network access and are gated behind a build tag:
+
+```bash
+go test -tags integration ./...
+```
+
+To run only integration tests:
+
+```bash
+go test -tags integration -run Integration ./...
+```
+
+### Test Coverage Summary
+
+| Package | Unit Tests | Integration Tests |
+|---|---|---|
+| `captcher` | 7 | — |
+| `recaptcha` | 13 | 11 (v2: 6, v3: 5) |
+| `turnstile` | 9 | 10 |
+| `middleware/stdhttp` | 9 | 6 |
+| `middleware/ginmw` | 10 | 6 |
+| `middleware/echomw` | 10 | 6 |
+| **Total** | **58** | **39** |
+
 ## Project Structure
 
 ```
