@@ -17,7 +17,11 @@ type verifier struct {
 }
 
 // NewV2 creates a reCAPTCHA v2 verifier.
+// It panics if the secret is empty.
 func NewV2(secret string, options ...captcher.Option) captcher.Verifier {
+	if secret == "" {
+		panic("captcha: recaptcha secret is required")
+	}
 	opts := captcher.DefaultOptions()
 	captcher.ApplyOptions(opts, options)
 	return &verifier{
@@ -32,7 +36,11 @@ func NewV2(secret string, options ...captcher.Option) captcher.Verifier {
 }
 
 // NewV3 creates a reCAPTCHA v3 verifier.
+// It panics if the secret is empty.
 func NewV3(secret string, options ...captcher.Option) captcher.Verifier {
+	if secret == "" {
+		panic("captcha: recaptcha secret is required")
+	}
 	opts := captcher.DefaultOptions()
 	captcher.ApplyOptions(opts, options)
 	return &verifier{

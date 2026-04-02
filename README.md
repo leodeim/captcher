@@ -237,12 +237,12 @@ go test -tags integration -run Integration ./...
 | Package | Unit Tests | Integration Tests |
 |---|---|---|
 | `captcher` | 7 | — |
-| `recaptcha` | 13 | 11 (v2: 6, v3: 5) |
-| `turnstile` | 9 | 10 |
+| `recaptcha` | 15 | 11 (v2: 6, v3: 5) |
+| `turnstile` | 10 | 10 |
 | `middleware/stdhttp` | 9 | 6 |
 | `middleware/ginmw` | 10 | 6 |
 | `middleware/echomw` | 10 | 6 |
-| **Total** | **58** | **39** |
+| **Total** | **61** | **39** |
 
 ## Project Structure
 

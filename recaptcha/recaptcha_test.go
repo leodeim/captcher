@@ -220,6 +220,24 @@ func TestV3_ActionMismatch(t *testing.T) {
 
 // --- Error Handling Tests ---
 
+func TestV2_EmptySecret_Panics(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("expected panic for empty secret")
+		}
+	}()
+	NewV2("")
+}
+
+func TestV3_EmptySecret_Panics(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("expected panic for empty secret")
+		}
+	}()
+	NewV3("")
+}
+
 func TestV2_ServerError(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)

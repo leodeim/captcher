@@ -148,6 +148,15 @@ func TestActionMismatch(t *testing.T) {
 
 // --- Error Handling ---
 
+func TestEmptySecret_Panics(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("expected panic for empty secret")
+		}
+	}()
+	New("")
+}
+
 func TestServerError(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
