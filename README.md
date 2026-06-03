@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.png" alt="captcher logo" width="350">
+</p>
+
 # captcher
 
 A universal Go library for CAPTCHA verification supporting Google reCAPTCHA (v2 and v3) and Cloudflare Turnstile. Swap providers without changing application code.
