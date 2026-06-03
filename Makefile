@@ -1,37 +1,43 @@
-.PHONY: all build test test-integration test-all vet lint fmt tidy cover cover-html clean help
+.PHONY: all build test test-v test-integration test-all test-race vet lint fmt fmt-check tidy cover cover-integration cover-html clean ci help
+
+# This repository is a multi-module workspace: the core lives in the root
+# module, each web-framework adapter is its own module so consumers only pull
+# in the framework they actually use, and the runnable example is its own
+# module (it depends on every adapter). Most targets iterate every module.
+MODULES = . middleware/ginmw middleware/echomw example
 
 # Default target
 all: fmt tidy vet test
 
 ## Build
 
-build: ## Build all packages
-	go build ./...
+build: ## Build all packages (all modules)
+	@for d in $(MODULES); do echo "== build $$d =="; (cd $$d && go build ./...) || exit 1; done
 
 ## Testing
 
-test: ## Run unit tests
-	go test ./...
+test: ## Run unit tests (all modules)
+	@for d in $(MODULES); do echo "== test $$d =="; (cd $$d && go test ./...) || exit 1; done
 
-test-v: ## Run unit tests (verbose)
-	go test -v ./...
+test-v: ## Run unit tests (verbose, all modules)
+	@for d in $(MODULES); do echo "== test $$d =="; (cd $$d && go test -v ./...) || exit 1; done
 
-test-integration: ## Run integration tests (requires network)
-	go test -tags integration -run Integration ./...
+test-integration: ## Run integration tests (requires network, all modules)
+	@for d in $(MODULES); do echo "== integration $$d =="; (cd $$d && go test -tags integration -run Integration ./...) || exit 1; done
 
-test-all: ## Run all tests (unit + integration)
-	go test -tags integration ./...
+test-all: ## Run all tests (unit + integration, all modules)
+	@for d in $(MODULES); do echo "== test-all $$d =="; (cd $$d && go test -tags integration ./...) || exit 1; done
 
-test-race: ## Run unit tests with race detector
-	go test -race ./...
+test-race: ## Run unit tests with race detector (all modules)
+	@for d in $(MODULES); do echo "== test-race $$d =="; (cd $$d && go test -race ./...) || exit 1; done
 
 ## Code Quality
 
-vet: ## Run go vet
-	go vet ./...
+vet: ## Run go vet (all modules)
+	@for d in $(MODULES); do echo "== vet $$d =="; (cd $$d && go vet ./...) || exit 1; done
 
 lint: ## Run staticcheck (install: go install honnef.co/go/tools/cmd/staticcheck@latest)
-	staticcheck ./...
+	@for d in $(MODULES); do echo "== lint $$d =="; (cd $$d && staticcheck ./...) || exit 1; done
 
 fmt: ## Format code
 	gofmt -w .
@@ -41,22 +47,21 @@ fmt-check: ## Check formatting (fails if unformatted)
 
 ## Dependencies
 
-tidy: ## Tidy module dependencies
-	go mod tidy
+tidy: ## Tidy module dependencies (all modules)
+	@for d in $(MODULES); do echo "== tidy $$d =="; (cd $$d && go mod tidy) || exit 1; done
 
 ## Coverage
 
 COVER_PROFILE ?= coverage.out
 
-cover: ## Generate coverage report
+cover: ## Generate coverage report (all modules)
+	@for d in $(MODULES); do echo "== cover $$d =="; (cd $$d && go test -coverprofile=$(COVER_PROFILE) -covermode=atomic ./... && go tool cover -func=$(COVER_PROFILE)) || exit 1; done
+
+cover-integration: ## Generate coverage report including integration tests (all modules)
+	@for d in $(MODULES); do echo "== cover $$d =="; (cd $$d && go test -tags integration -coverprofile=$(COVER_PROFILE) -covermode=atomic ./... && go tool cover -func=$(COVER_PROFILE)) || exit 1; done
+
+cover-html: ## Open root-module coverage report in browser
 	go test -coverprofile=$(COVER_PROFILE) -covermode=atomic ./...
-	go tool cover -func=$(COVER_PROFILE)
-
-cover-integration: ## Generate coverage report including integration tests
-	go test -tags integration -coverprofile=$(COVER_PROFILE) -covermode=atomic ./...
-	go tool cover -func=$(COVER_PROFILE)
-
-cover-html: cover ## Open coverage report in browser
 	go tool cover -html=$(COVER_PROFILE)
 
 ## Maintenance
@@ -64,6 +69,7 @@ cover-html: cover ## Open coverage report in browser
 clean: ## Remove build artifacts and coverage files
 	go clean -testcache
 	rm -f coverage.out coverage.html *.coverprofile *.test
+	rm -f middleware/ginmw/coverage.out middleware/echomw/coverage.out example/coverage.out
 
 ## CI (runs everything a CI pipeline would)
 

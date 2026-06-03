@@ -18,6 +18,19 @@ A universal Go library for CAPTCHA verification supporting Google reCAPTCHA (v2 
 go get github.com/leodeim/captcher
 ```
 
+The core library (verifiers, options, context helpers, and the net/http
+middleware) has **zero third-party dependencies**. The Gin and Echo adapters
+live in separate modules so you only pull in a web framework if you actually
+use its adapter:
+
+```bash
+# only if you use the Gin adapter
+go get github.com/leodeim/captcher/middleware/ginmw
+
+# only if you use the Echo adapter
+go get github.com/leodeim/captcher/middleware/echomw
+```
+
 ## Quick Start
 
 ### Direct Verification
@@ -247,18 +260,34 @@ go test -tags integration -run Integration ./...
 ## Project Structure
 
 ```
-captcher/
+captcher/                     # core module (go.mod) — zero third-party deps
 ├── captcher.go              # Verifier interface, types, errors, options
 ├── middleware.go             # MiddlewareConfig, context helpers
 ├── internal/verify/          # Shared HTTP verification logic
 ├── recaptcha/                # Google reCAPTCHA v2 + v3
 ├── turnstile/                # Cloudflare Turnstile
 ├── middleware/
-│   ├── stdhttp/              # net/http middleware
-│   ├── ginmw/                # Gin middleware
-│   └── echomw/               # Echo middleware
-└── example/                  # Usage examples
+│   ├── stdhttp/              # net/http middleware (in core module)
+│   ├── ginmw/                # Gin middleware — separate module (go.mod)
+│   └── echomw/               # Echo middleware — separate module (go.mod)
+└── example/                  # Runnable example — separate module (go.mod)
 ```
+
+The Gin and Echo adapters are independent Go modules, so the core module's
+dependency graph stays free of `gin`, `echo`, and their transitive trees. The
+example depends on every adapter, so it is its own module too.
+
+Run the example and pick a framework with the `FRAMEWORK` env var:
+
+```bash
+cd example
+go run .                  # net/http (default)
+FRAMEWORK=gin  go run .    # Gin
+FRAMEWORK=echo go run .    # Echo
+```
+
+It first runs direct (no-middleware) verification against all three providers,
+then starts an HTTP server on `:8080` using the selected framework's middleware.
 
 ## License
 

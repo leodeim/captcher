@@ -25,23 +25,36 @@ jobs:
           go-version: ${{ matrix.go-version }}
 
       - name: Verify dependencies
-        run: go mod tidy && git diff --exit-code go.mod go.sum
+        run: |
+          for dir in . middleware/ginmw middleware/echomw example; do
+            (cd "$dir" && go mod tidy)
+          done
+          git diff --exit-code
 
       - name: Check formatting
         run: test -z "$(gofmt -l .)"
 
       - name: Vet
-        run: go vet ./...
+        run: |
+          for dir in . middleware/ginmw middleware/echomw example; do
+            (cd "$dir" && go vet ./...)
+          done
 
       - name: Unit tests
-        run: go test -race -coverprofile=coverage.out -covermode=atomic ./...
+        run: |
+          for dir in . middleware/ginmw middleware/echomw example; do
+            (cd "$dir" && go test -race -coverprofile=coverage.out -covermode=atomic ./...)
+          done
 
       - name: Integration tests
-        run: go test -tags integration -race -run Integration ./...
+        run: |
+          for dir in . middleware/ginmw middleware/echomw example; do
+            (cd "$dir" && go test -tags integration -race -run Integration ./...)
+          done
 
       - name: Upload coverage
         if: matrix.go-version == '1.25'
         uses: codecov/codecov-action@v4
         with:
-          files: coverage.out
+          files: ./coverage.out,./middleware/ginmw/coverage.out,./middleware/echomw/coverage.out
         continue-on-error: true
