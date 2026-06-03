@@ -39,7 +39,5 @@ require (
 	google.golang.org/protobuf v1.36.10 // indirect
 )
 
-// Use the in-repo core during local development and CI. This directive is
-// ignored when ginmw is consumed as a dependency, where the required
-// version of github.com/leodeim/captcher above is used instead.
+// Local-dev core; ignored when ginmw is consumed as a dependency (uses the required version above).
 replace github.com/leodeim/captcher => ../..

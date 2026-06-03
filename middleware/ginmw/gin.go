@@ -66,8 +66,7 @@ func extractToken(c *gin.Context, cfg *captcher.MiddlewareConfig) string {
 		}
 	}
 
-	// 2. Try form field (Gin's PostForm only checks POST body, so we also
-	//    check query to match the behavior of net/http's FormValue used by stdhttp and Echo)
+	// 2. Try form field (Gin's PostForm is POST-only, so also check query to match net/http's FormValue).
 	if cfg.TokenFormField != "" {
 		if token := c.PostForm(cfg.TokenFormField); token != "" {
 			return token

@@ -40,8 +40,7 @@ func (p *panicVerifier) Provider() captcher.Provider {
 	return captcher.ProviderRecaptchaV2
 }
 
-// newRouter creates a gin.Engine with the captcha middleware and a test handler
-// on the given path. The test handler writes 200 and stores the response.
+// newRouter builds a gin.Engine with the captcha middleware and a test handler (writes 200, stores the response).
 func newRouter(cfg *captcher.MiddlewareConfig, path string, handler gin.HandlerFunc) *gin.Engine {
 	r := gin.New()
 	r.Use(Middleware(cfg))

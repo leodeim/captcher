@@ -15,8 +15,7 @@ type verifier struct {
 	cfg verify.Config
 }
 
-// New creates a Cloudflare Turnstile verifier.
-// It panics if the secret is empty.
+// New creates a Cloudflare Turnstile verifier; it panics if secret is empty.
 func New(secret string, options ...captcher.Option) captcher.Verifier {
 	if secret == "" {
 		panic("captcha: turnstile secret is required")

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"net"
 	"net/http"
+	"strings"
 
 	"github.com/leodeim/captcher"
 )
@@ -87,8 +88,11 @@ func extractToken(r *http.Request, cfg *captcher.MiddlewareConfig) string {
 
 func extractIP(r *http.Request, cfg *captcher.MiddlewareConfig) string {
 	if cfg.IPHeader != "" {
-		if ip := r.Header.Get(cfg.IPHeader); ip != "" {
-			return ip
+		if v := r.Header.Get(cfg.IPHeader); v != "" {
+			if i := strings.IndexByte(v, ','); i >= 0 {
+				v = v[:i]
+			}
+			return strings.TrimSpace(v)
 		}
 	}
 	host, _, err := net.SplitHostPort(r.RemoteAddr)

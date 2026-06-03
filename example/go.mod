@@ -46,9 +46,7 @@ require (
 	google.golang.org/protobuf v1.36.10 // indirect
 )
 
-// Use the in-repo packages during local development. These directives are only
-// honored when this example module is the main module, which it always is —
-// nothing imports the example.
+// Local-dev paths; honored only because the example is always the main module (nothing imports it).
 replace (
 	github.com/leodeim/captcher => ..
 	github.com/leodeim/captcher/middleware/echomw => ../middleware/echomw

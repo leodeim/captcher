@@ -16,8 +16,7 @@ type verifier struct {
 	cfg verify.Config
 }
 
-// NewV2 creates a reCAPTCHA v2 verifier.
-// It panics if the secret is empty.
+// NewV2 creates a reCAPTCHA v2 verifier; it panics if secret is empty.
 func NewV2(secret string, options ...captcher.Option) captcher.Verifier {
 	if secret == "" {
 		panic("captcha: recaptcha secret is required")
@@ -35,8 +34,7 @@ func NewV2(secret string, options ...captcher.Option) captcher.Verifier {
 	}
 }
 
-// NewV3 creates a reCAPTCHA v3 verifier.
-// It panics if the secret is empty.
+// NewV3 creates a reCAPTCHA v3 verifier; it panics if secret is empty.
 func NewV3(secret string, options ...captcher.Option) captcher.Verifier {
 	if secret == "" {
 		panic("captcha: recaptcha secret is required")

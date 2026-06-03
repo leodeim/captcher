@@ -1,12 +1,4 @@
-// Command example demonstrates the captcher library: direct verification with
-// the core module, and the three HTTP middleware adapters (net/http, Gin, Echo).
-//
-// The core module (github.com/leodeim/captcher) has zero third-party
-// dependencies. The Gin and Echo adapters live in their own modules, so this
-// example — which exercises all of them — is itself a separate module (see
-// example/go.mod). A real application would only depend on the adapter it uses.
-//
-// Run it and pick a framework with the FRAMEWORK env var:
+// Command example demonstrates captcher: direct verification plus the net/http, Gin, and Echo middleware adapters.
 //
 //	go run .                 # net/http (default)
 //	FRAMEWORK=gin  go run .
@@ -46,10 +38,7 @@ func main() {
 	}
 }
 
-// -------------------------------------------------------------------------
 // Core module: direct verification, no middleware.
-// -------------------------------------------------------------------------
-
 func directVerification() {
 	// reCAPTCHA v2.
 	v2 := recaptcha.NewV2("your-recaptcha-v2-secret")
@@ -80,8 +69,7 @@ func directVerification() {
 	fmt.Printf("Turnstile: success=%v, err=%v\n", resp != nil && resp.Success, err)
 }
 
-// newVerifier builds a verifier from config. Swapping providers is a one-line
-// change — the rest of the application (and middleware) is provider-agnostic.
+// newVerifier builds a verifier from config; swapping providers is a one-line change.
 func newVerifier(provider, secret string) captcher.Verifier {
 	switch provider {
 	case "recaptcha_v2":
@@ -95,8 +83,7 @@ func newVerifier(provider, secret string) captcher.Verifier {
 	}
 }
 
-// sharedConfig is the middleware configuration reused by every framework below,
-// proving the config type is identical across adapters.
+// sharedConfig is the middleware config reused by every framework below.
 func sharedConfig() *captcher.MiddlewareConfig {
 	// In a real app the provider and secret come from env/config.
 	verifier := newVerifier("turnstile", "your-turnstile-secret")
@@ -107,10 +94,7 @@ func sharedConfig() *captcher.MiddlewareConfig {
 	return cfg
 }
 
-// -------------------------------------------------------------------------
 // net/http middleware (lives in the core module — zero extra dependencies).
-// -------------------------------------------------------------------------
-
 func stdHTTPServer() {
 	cfg := sharedConfig()
 
@@ -129,10 +113,7 @@ func stdHTTPServer() {
 	log.Fatal(http.ListenAndServe(":8080", handler))
 }
 
-// -------------------------------------------------------------------------
 // Gin middleware (separate module: github.com/leodeim/captcher/middleware/ginmw).
-// -------------------------------------------------------------------------
-
 func ginServer() {
 	cfg := sharedConfig()
 
@@ -151,10 +132,7 @@ func ginServer() {
 	log.Fatal(r.Run(":8080"))
 }
 
-// -------------------------------------------------------------------------
 // Echo middleware (separate module: github.com/leodeim/captcher/middleware/echomw).
-// -------------------------------------------------------------------------
-
 func echoServer() {
 	cfg := sharedConfig()
 

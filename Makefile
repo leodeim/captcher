@@ -1,9 +1,6 @@
 .PHONY: all build test test-v test-integration test-all test-race vet lint fmt fmt-check tidy cover cover-integration cover-html clean ci help
 
-# This repository is a multi-module workspace: the core lives in the root
-# module, each web-framework adapter is its own module so consumers only pull
-# in the framework they actually use, and the runnable example is its own
-# module (it depends on every adapter). Most targets iterate every module.
+# Multi-module workspace: root core + per-framework adapter modules + example module. Most targets iterate all.
 MODULES = . middleware/ginmw middleware/echomw example
 
 # Default target

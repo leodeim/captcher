@@ -1,5 +1,4 @@
-// Package verify provides shared HTTP verification logic used by
-// the reCAPTCHA and Turnstile provider implementations.
+// Package verify holds the shared site-verify HTTP logic for the reCAPTCHA and Turnstile providers.
 package verify
 
 import (
@@ -18,8 +17,7 @@ import (
 // maxResponseBytes is the maximum size of a verification response body (1 MB).
 const maxResponseBytes = 1 << 20
 
-// ProviderResponse is the raw JSON response common to both
-// Google reCAPTCHA and Cloudflare Turnstile site-verify endpoints.
+// ProviderResponse is the raw JSON shared by the reCAPTCHA and Turnstile site-verify endpoints.
 type ProviderResponse struct {
 	Success     bool     `json:"success"`
 	Score       float64  `json:"score"`
@@ -39,9 +37,7 @@ type Config struct {
 	Opts      *captcher.Options
 }
 
-// Do performs the site-verify HTTP POST, parses the response, and applies
-// common validation (hostname and action checks). Provider-specific validation
-// (e.g. score threshold) should be done by the caller on the returned result.
+// Do runs the site-verify POST and applies common hostname/action checks; provider checks are left to callers.
 func Do(ctx context.Context, cfg *Config, req captcher.VerifyRequest) (*ProviderResponse, *captcher.VerifyResponse, error) {
 	if req.Token == "" {
 		return nil, nil, captcher.ErrMissingToken

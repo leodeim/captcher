@@ -1,5 +1,4 @@
-// Package captcher provides a unified interface for CAPTCHA verification
-// supporting Google reCAPTCHA (v2 and v3) and Cloudflare Turnstile.
+// Package captcher provides a unified CAPTCHA verification interface for reCAPTCHA v2/v3 and Cloudflare Turnstile.
 package captcher
 
 import (
@@ -39,31 +38,14 @@ type VerifyRequest struct {
 
 // VerifyResponse contains the result of a CAPTCHA verification.
 type VerifyResponse struct {
-	// Success indicates whether the verification passed.
-	Success bool
-
-	// Score is the risk score (0.0 - 1.0), primarily used by reCAPTCHA v3.
-	// Higher scores mean the interaction is more likely legitimate.
-	Score float64
-
-	// Action is the action name from the provider (reCAPTCHA v3 or Turnstile, if applicable).
-	Action string
-
-	// Hostname is the hostname of the site where the CAPTCHA was solved.
-	Hostname string
-
-	// ChallengeTS is the timestamp of the challenge.
+	Success     bool
+	Score       float64
+	Action      string
+	Hostname    string
 	ChallengeTS time.Time
-
-	// ErrorCodes contains provider-specific error codes (if any).
-	ErrorCodes []string
-
-	// CData is the customer data string passed through by Cloudflare Turnstile.
-	// This is only populated for Turnstile verifications.
-	CData string
-
-	// Provider identifies which CAPTCHA service processed this request.
-	Provider Provider
+	ErrorCodes  []string
+	CData       string
+	Provider    Provider
 }
 
 // Verifier is the core interface for CAPTCHA verification.
@@ -80,25 +62,10 @@ type Option func(*Options)
 
 // Options holds common configuration for verifiers.
 type Options struct {
-	// HTTPClient is the HTTP client used for verification requests.
-	// If nil, a default client with a 10-second timeout is used.
-	HTTPClient *http.Client
-
-	// Timeout is the request timeout for verification.
-	// Defaults to 10 seconds.
-	Timeout time.Duration
-
-	// ScoreThreshold is the minimum acceptable score for reCAPTCHA v3.
-	// Tokens with a score below this threshold will fail verification.
-	// Defaults to 0.5. Only used by reCAPTCHA v3.
-	ScoreThreshold float64
-
-	// ExpectedAction is the expected action name (reCAPTCHA v3 and Turnstile).
-	// If set, verification will fail if the action doesn't match.
-	ExpectedAction string
-
-	// ExpectedHostname is the expected hostname.
-	// If set, verification will fail if the hostname doesn't match.
+	HTTPClient       *http.Client
+	Timeout          time.Duration
+	ScoreThreshold   float64
+	ExpectedAction   string
 	ExpectedHostname string
 }
 

@@ -12,12 +12,7 @@ import (
 	"github.com/leodeim/captcher/recaptcha"
 )
 
-// Google reCAPTCHA test credentials.
-// See https://developers.google.com/recaptcha/docs/faq
-//
-// These keys always pass verification for reCAPTCHA v2 (no CAPTCHA challenge).
-// For v3, the same endpoint is used; the test secret will return success but
-// score values are not meaningful.
+// Google reCAPTCHA test credentials (v2 always passes; v3 reuses the endpoint, scores not meaningful).
 const (
 	// testSecret is Google's public test secret key.
 	testSecret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
@@ -125,14 +120,7 @@ func TestIntegration_V2_ResponseFields(t *testing.T) {
 		resp.Hostname, resp.Action, resp.Score, resp.ChallengeTS)
 }
 
-// --- reCAPTCHA v3 Integration Tests ---
-//
-// There are no public test keys for reCAPTCHA v3. We use the v2 test secret
-// here because the siteverify endpoint is the same. This validates the full
-// HTTP round-trip and JSON parsing. The score returned is not meaningful (the
-// test secret doesn't return a real score), so we set the threshold to 0.0 to
-// avoid ErrScoreTooLow.
-
+// reCAPTCHA v3 tests: no public v3 keys, so reuse the v2 secret (same endpoint); scores are meaningless.
 func TestIntegration_V3_Success_WithLowThreshold(t *testing.T) {
 	// Threshold 0.0 so the test secret's score (likely 0) doesn't fail.
 	v := recaptcha.NewV3(testSecret, captcher.WithScoreThreshold(0.0))
@@ -153,17 +141,14 @@ func TestIntegration_V3_Success_WithLowThreshold(t *testing.T) {
 }
 
 func TestIntegration_V3_ScoreBelowThreshold(t *testing.T) {
-	// Set threshold very high — the test secret returns score 0 (or very low),
-	// so this should fail with ErrScoreTooLow.
+	// High threshold — the test secret returns ~0 score, so this should fail with ErrScoreTooLow.
 	v := recaptcha.NewV3(testSecret, captcher.WithScoreThreshold(0.99))
 
 	resp, err := v.Verify(context.Background(), captcher.VerifyRequest{
 		Token: anyToken,
 	})
 
-	// Google's test secret might return score=0 which is < 0.99.
-	// If it does, we expect ErrScoreTooLow. If by some chance the test API
-	// returns a high score, this test still validates the flow.
+	// Test secret usually returns score 0 (< 0.99) → ErrScoreTooLow; a high score still validates the flow.
 	if err != nil {
 		if !errors.Is(err, captcher.ErrScoreTooLow) {
 			t.Errorf("expected ErrScoreTooLow, got: %v", err)

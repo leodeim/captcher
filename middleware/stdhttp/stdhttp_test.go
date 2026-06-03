@@ -202,3 +202,70 @@ func TestVerifyResponseFromContext_Missing(t *testing.T) {
 		t.Error("expected nil for missing context value")
 	}
 }
+
+func TestExtractIP(t *testing.T) {
+	tests := []struct {
+		name       string
+		ipHeader   string
+		headerVal  string
+		remoteAddr string
+		want       string
+	}{
+		{
+			name:       "no IPHeader falls back to RemoteAddr host",
+			remoteAddr: "203.0.113.7:54321",
+			want:       "203.0.113.7",
+		},
+		{
+			name:       "RemoteAddr without port returned as-is",
+			remoteAddr: "203.0.113.7",
+			want:       "203.0.113.7",
+		},
+		{
+			name:      "X-Forwarded-For with single IP",
+			ipHeader:  "X-Forwarded-For",
+			headerVal: "198.51.100.23",
+			want:      "198.51.100.23",
+		},
+		{
+			name:      "X-Forwarded-For list takes left-most client IP",
+			ipHeader:  "X-Forwarded-For",
+			headerVal: "198.51.100.23, 70.41.3.18, 150.172.238.178",
+			want:      "198.51.100.23",
+		},
+		{
+			name:      "X-Forwarded-For list without spaces",
+			ipHeader:  "X-Forwarded-For",
+			headerVal: "198.51.100.23,70.41.3.18",
+			want:      "198.51.100.23",
+		},
+		{
+			name:       "empty header falls back to RemoteAddr",
+			ipHeader:   "X-Forwarded-For",
+			headerVal:  "",
+			remoteAddr: "203.0.113.7:9999",
+			want:       "203.0.113.7",
+		},
+		{
+			name:      "X-Real-IP single value passes through",
+			ipHeader:  "X-Real-IP",
+			headerVal: "192.0.2.44",
+			want:      "192.0.2.44",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/", nil)
+			req.RemoteAddr = tt.remoteAddr
+			if tt.ipHeader != "" && tt.headerVal != "" {
+				req.Header.Set(tt.ipHeader, tt.headerVal)
+			}
+
+			cfg := &captcher.MiddlewareConfig{IPHeader: tt.ipHeader}
+			if got := extractIP(req, cfg); got != tt.want {
+				t.Errorf("extractIP() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
