@@ -2,6 +2,12 @@
   <img src="logo.png" alt="captcher logo" width="350">
 </p>
 
+<p align="center">
+  <a href="https://github.com/leodeim/captcher/actions/workflows/ci.yml"><img src="https://github.com/leodeim/captcher/actions/workflows/ci.yml/badge.svg" alt="Build and Release"></a>
+  <a href="https://github.com/leodeim/captcher/releases/latest"><img src="https://img.shields.io/github/v/release/leodeim/captcher" alt="Latest Release"></a>
+  <a href="https://github.com/leodeim/captcher/blob/main/LICENSE"><img src="https://img.shields.io/github/license/leodeim/captcher" alt="License"></a>
+</p>
+
 # captcher
 
 A universal Go library for CAPTCHA verification supporting Google reCAPTCHA (v2 and v3) and Cloudflare Turnstile. Swap providers without changing application code.
@@ -219,67 +225,7 @@ if errors.Is(err, captcher.ErrVerifyFailed) {
 | `ErrInvalidResponse` | Provider returned unparseable JSON |
 | `ErrTimeout` | Request context was cancelled or timed out |
 
-## Testing
-
-### Unit Tests
-
-Unit tests use mock HTTP servers and run without network access:
-
-```bash
-go test ./...
-```
-
-### Integration Tests
-
-Integration tests hit the real provider APIs using official test credentials:
-
-- **Cloudflare Turnstile**: [dummy sitekeys and secret keys](https://developers.cloudflare.com/turnstile/troubleshooting/testing/) with deterministic pass/fail/duplicate outcomes
-- **Google reCAPTCHA v2**: [public test keys](https://developers.google.com/recaptcha/docs/faq) that always pass verification
-- **Google reCAPTCHA v3**: uses the v2 test secret (same endpoint) to validate the HTTP flow end-to-end (score is not meaningful)
-
-Integration tests require network access and are gated behind a build tag:
-
-```bash
-go test -tags integration ./...
-```
-
-To run only integration tests:
-
-```bash
-go test -tags integration -run Integration ./...
-```
-
-### Test Coverage Summary
-
-| Package | Unit Tests | Integration Tests |
-|---|---|---|
-| `captcher` | 7 | — |
-| `recaptcha` | 15 | 11 (v2: 6, v3: 5) |
-| `turnstile` | 10 | 10 |
-| `middleware/stdhttp` | 9 | 6 |
-| `middleware/ginmw` | 10 | 6 |
-| `middleware/echomw` | 10 | 6 |
-| **Total** | **61** | **39** |
-
-## Project Structure
-
-```
-captcher/                     # core module (go.mod) — zero third-party deps
-├── captcher.go              # Verifier interface, types, errors, options
-├── middleware.go             # MiddlewareConfig, context helpers
-├── internal/verify/          # Shared HTTP verification logic
-├── recaptcha/                # Google reCAPTCHA v2 + v3
-├── turnstile/                # Cloudflare Turnstile
-├── middleware/
-│   ├── stdhttp/              # net/http middleware (in core module)
-│   ├── ginmw/                # Gin middleware — separate module (go.mod)
-│   └── echomw/               # Echo middleware — separate module (go.mod)
-└── example/                  # Runnable example — separate module (go.mod)
-```
-
-The Gin and Echo adapters are independent Go modules, so the core module's
-dependency graph stays free of `gin`, `echo`, and their transitive trees. The
-example depends on every adapter, so it is its own module too.
+## Examples
 
 Run the example and pick a framework with the `FRAMEWORK` env var:
 
